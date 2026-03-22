@@ -11,7 +11,7 @@ import axios from 'axios';
  *   const response = await api.get('/students');
  */
 const api = axios.create({
-    baseURL: 'http://localhost:8080/api',   // Spring Boot backend
+    baseURL: 'https://student-management-k93k.onrender.com/api',   // Render backend
     headers: {
         'Content-Type': 'application/json',
     },
