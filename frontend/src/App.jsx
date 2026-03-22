@@ -5,21 +5,7 @@ import StudentsListPage from './pages/StudentsListPage';
 import AddStudentPage from './pages/AddStudentPage';
 import UsersPage from './pages/UsersPage';
 
-/**
- * App Component — Root component that sets up routing.
- * 
- * Routes:
- *   /           → LoginPage (public)
- *   /dashboard  → DashboardPage (protected)
- *   /students   → StudentsListPage (protected)
- *   /add-student → AddStudentPage (ADMIN only)
- * 
- * PrivateRoute: Redirects to login if user is not authenticated.
- * AdminRoute:   Redirects to dashboard if user is not ADMIN.
- */
 
-// ─── Protected Route ──────────────────────────────────────────────────────────
-// Checks if user is logged in (username in localStorage)
 function PrivateRoute({ children }) {
     const username = localStorage.getItem('username');
     if (!username) {

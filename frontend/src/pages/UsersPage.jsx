@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
+import ConfirmModal from '../components/ConfirmModal';
 import api from '../api/axios';
 
 /**
@@ -22,6 +23,10 @@ function UsersPage() {
     const [formErrors, setFormErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
     const [showForm, setShowForm] = useState(false);
+
+    // Custom Delete Modal State
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
 
     const currentUser = localStorage.getItem('username');
 
@@ -79,19 +84,27 @@ function UsersPage() {
     };
 
     // ─── Delete User ───────────────────────────────────────────────────────────
-    const handleDelete = async (id, username) => {
+    const triggerDelete = (id, username) => {
         if (username === currentUser) {
             setError("⚠️ You cannot delete your own account.");
             return;
         }
-        if (!window.confirm(`Delete user "${username}"?`)) return;
+        setUserToDelete({ id, username });
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!userToDelete) return;
         try {
-            await api.delete(`/users/${id}`);
-            setSuccessMsg(`✅ User "${username}" deleted.`);
+            await api.delete(`/users/${userToDelete.id}`);
+            setSuccessMsg(`✅ User "${userToDelete.username}" deleted.`);
             fetchUsers();
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch {
             setError('Failed to delete user.');
+        } finally {
+            setShowDeleteModal(false);
+            setUserToDelete(null);
         }
     };
 
@@ -250,7 +263,7 @@ function UsersPage() {
                                         <td>
                                             <button
                                                 className="btn btn-danger btn-sm"
-                                                onClick={() => handleDelete(user.id, user.username)}
+                                                onClick={() => triggerDelete(user.id, user.username)}
                                                 disabled={user.username === currentUser}
                                                 id={`btn-delete-user-${user.id}`}
                                                 title={user.username === currentUser ? "Can't delete yourself" : 'Delete user'}
@@ -266,6 +279,15 @@ function UsersPage() {
                 </div>
 
             </main>
+
+            <ConfirmModal 
+                isOpen={showDeleteModal}
+                title="⚠️ Delete User Confirmation"
+                message={`Are you sure you want to delete user <strong>"${userToDelete?.username}"</strong>?<br/><br/><span style="color:red;font-size:0.85rem">This action cannot be undone.</span>`}
+                onConfirm={confirmDelete}
+                onCancel={() => setShowDeleteModal(false)}
+                confirmText="Yes, Delete User"
+            />
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import ConfirmModal from '../components/ConfirmModal';
 import api from '../api/axios';
 
 /**
@@ -24,6 +25,10 @@ function StudentsListPage() {
         name: '', email: '', course: '', department: ''
     });
     const [successMsg, setSuccessMsg] = useState('');       // Success message
+    
+    // Custom Delete Modal State
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [studentToDelete, setStudentToDelete] = useState(null);
 
     const navigate = useNavigate();
     const role = localStorage.getItem('role');              // 'ADMIN' or 'USER'
@@ -120,18 +125,23 @@ function StudentsListPage() {
     };
 
     // ─── Delete Handler ───────────────────────────────────────────────────────────
-    const handleDelete = async (id, name) => {
-        // Confirm before deleting
-        if (!window.confirm(`⚠️ Are you sure you want to delete student "${name}"?`)) {
-            return;
-        }
+    const triggerDelete = (id, name) => {
+        setStudentToDelete({ id, name });
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!studentToDelete) return;
         try {
-            await api.delete(`/students/${id}`);
-            setSuccessMsg(`✅ Student "${name}" deleted successfully!`);
+            await api.delete(`/students/${studentToDelete.id}`);
+            setSuccessMsg(`✅ Student "${studentToDelete.name}" deleted successfully!`);
             fetchStudents(); // Reload list
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) {
             setError('Failed to delete student. Please try again.');
+        } finally {
+            setShowDeleteModal(false);
+            setStudentToDelete(null);
         }
     };
 
@@ -317,7 +327,7 @@ function StudentsListPage() {
                                                         </button>
                                                         <button
                                                             className="btn btn-danger btn-sm"
-                                                            onClick={() => handleDelete(student.id, student.name)}
+                                                            onClick={() => triggerDelete(student.id, student.name)}
                                                             id={`btn-delete-${student.id}`}
                                                         >
                                                             🗑️ Delete
@@ -333,6 +343,15 @@ function StudentsListPage() {
                     )}
                 </div>
             </main>
+
+            <ConfirmModal 
+                isOpen={showDeleteModal}
+                title="⚠️ Delete Confirmation"
+                message={`Are you sure you want to delete student <strong>"${studentToDelete?.name}"</strong>?<br/><br/><span style="color:red;font-size:0.85rem">This action cannot be undone.</span>`}
+                onConfirm={confirmDelete}
+                onCancel={() => setShowDeleteModal(false)}
+                confirmText="Yes, Delete Student"
+            />
         </div>
     );
 }
