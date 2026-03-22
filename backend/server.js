@@ -13,7 +13,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://student-management-cxv20aojy-phoenixdhanush7-7194s-projects.vercel.app'],
+    origin: ['http://localhost:5173', 'https://student-management-cxv20aojy-phoenixdhanush7-7194s-projects.vercel.app', 'https://student-management-pi-eight.vercel.app'],
     credentials: true
 }));
 app.use(express.json());
