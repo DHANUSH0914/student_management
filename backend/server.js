@@ -1,7 +1,11 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import dns from 'dns';
 import connectDB from './config/db.js';
+
+// Node 18+ prefers IPv6 by default, which breaks outgoing Gmail connections on Render's free tier
+dns.setDefaultResultOrder('ipv4first');
 
 // Load env vars
 dotenv.config();
