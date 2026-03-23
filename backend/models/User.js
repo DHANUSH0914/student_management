@@ -14,7 +14,14 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true,
         enum: ['ADMIN', 'USER']
-    }
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date
 });
 
 // Transform _id to id when converting to JSON

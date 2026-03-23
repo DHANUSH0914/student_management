@@ -30,7 +30,8 @@ const seedAdmin = async () => {
             const adminUser = new User({
                 username: 'admin',
                 password: 'admin123',
-                role: 'ADMIN'
+                role: 'ADMIN',
+                email: 'admin@studentmanagement.com'
             });
 
             await adminUser.save();

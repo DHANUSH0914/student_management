@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
 // POST /api/users
 router.post('/', async (req, res) => {
     try {
-        const { username, password, role } = req.body;
+        const { username, password, role, email } = req.body;
 
         if (!username || username.trim() === '') {
             return res.status(400).json({ message: "Username is required." });
@@ -33,24 +33,55 @@ router.post('/', async (req, res) => {
         if (role !== 'ADMIN' && role !== 'USER') {
             return res.status(400).json({ message: "Role must be ADMIN or USER." });
         }
+        if (!email || email.trim() === '') {
+            return res.status(400).json({ message: "Email is required." });
+        }
 
         const existingUser = await User.findOne({ username });
         if (existingUser) {
             return res.status(409).json({ message: `Username '${username}' is already taken.` });
         }
 
-        const newUser = new User({ username, password, role });
+        const newUser = new User({ username, password, role, email });
         const savedUser = await newUser.save();
 
         res.status(201).json({
             message: "User created successfully!",
             id: savedUser.id,
             username: savedUser.username,
-            role: savedUser.role
+            role: savedUser.role,
+            email: savedUser.email
         });
 
     } catch (error) {
         res.status(500).json({ message: "Server error", error: error.message });
+    }
+});
+
+// PUT /api/users/:id
+router.put('/:id', async (req, res) => {
+    try {
+        const { username, password, role, email } = req.body;
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        if (username) user.username = username;
+        if (role && (role === 'ADMIN' || role === 'USER')) user.role = role;
+        if (email) user.email = email;
+        if (password && password.length >= 4) user.password = password;
+
+        const updated = await user.save();
+        res.json({
+            message: 'User updated successfully!',
+            id: updated.id,
+            username: updated.username,
+            role: updated.role,
+            email: updated.email
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 

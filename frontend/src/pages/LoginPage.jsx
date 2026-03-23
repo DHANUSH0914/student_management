@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import ForgotModal from '../components/ForgotModal';
 
 /**
  * LoginPage Component — The entry point of the application.
@@ -22,6 +23,7 @@ function LoginPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');       
     const [loading, setLoading] = useState(false); 
+    const [showForgotModal, setShowForgotModal] = useState(false);
 
     const navigate = useNavigate();
 
@@ -140,6 +142,16 @@ function LoginPage() {
                             <span>🔐 Sign In</span>
                         )}
                     </button>
+                    
+                    <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                        <button 
+                            type="button" 
+                            onClick={() => setShowForgotModal(true)} 
+                            style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600' }}
+                        >
+                            Forgot Password?
+                        </button>
+                    </div>
                 </form>
 
                 {/* Quick Login Hints */}
@@ -163,6 +175,8 @@ function LoginPage() {
                     </div>
                 </div>
             </div>
+
+            <ForgotModal isOpen={showForgotModal} onClose={() => setShowForgotModal(false)} />
         </div>
     );
 }
