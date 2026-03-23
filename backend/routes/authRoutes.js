@@ -51,16 +51,23 @@ router.post('/forgotpassword', async (req, res) => {
         user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
         await user.save();
 
-        // Nodemailer transport using Gmail (port 587, forced IPv4 for Render)
+        // Make sure to import dns at the top of your file (we will add it if it's not there, but simpler is require('dns'))
+        const dns = await import('dns');
+        const smtpHostname = 'smtp.gmail.com';
+        const smtpInfo = await dns.promises.lookup(smtpHostname, { family: 4 });
+        const smtpIp = smtpInfo.address;
+
+        // Nodemailer transport using Gmail (Explicit IPv4 IP and SNI for SSL)
         const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false,
-            requireTLS: true,
-            family: 4,
+            host: smtpIp,
+            port: 465,
+            secure: true,
             connectionTimeout: 15000,
             greetingTimeout: 15000,
             socketTimeout: 15000,
+            tls: {
+                servername: smtpHostname // Required since we're connecting to an IP instead of the hostname
+            },
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
