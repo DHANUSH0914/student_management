@@ -51,16 +51,21 @@ router.post('/forgotpassword', async (req, res) => {
         user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
         await user.save();
 
-        // Nodemailer transport using Gmail
+        // Nodemailer transport using Gmail (SSL port 465 - more reliable on cloud hosts)
         const transporter = nodemailer.createTransport({
-            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 10000,
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
             }
         });
 
-        const frontendUrl = req.headers.origin || 'http://localhost:5173';
+        const frontendUrl = req.headers.origin || 'https://student-management-pi-eight.vercel.app';
         const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
         const mailOptions = {
@@ -82,7 +87,8 @@ router.post('/forgotpassword', async (req, res) => {
         res.status(200).json({ message: `Password reset email sent to ${user.email}. Please check your inbox.` });
 
     } catch (error) {
-        res.status(500).json({ message: 'Error processing request.', error: error.message });
+        console.error('Forgot password error:', error.message);
+        res.status(500).json({ message: `Failed to send email: ${error.message}` });
     }
 });
 
